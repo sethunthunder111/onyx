@@ -1,4 +1,4 @@
-# ONYX 💎
+# [ONYX 💎](https://sethunthunder111.github.io/onyx)
 
 > **The Ultimate YouTube Downloader.**  
 > *Simple. Fast. Elegant.*
@@ -23,7 +23,7 @@
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/SethunThunder/onyx.git
+    git clone https://github.com/sethunthunder111/onyx.git
     cd onyx
     ```
 
