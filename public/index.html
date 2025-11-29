@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onyx | Modern Downloader</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body class="dark">
+    <div class="container">
+        <header>
+            <div class="logo">ONYX</div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            </button>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h1>Download Anything.</h1>
+                <p class="subtitle">Simple, fast, and powerful YouTube downloader.</p>
+                
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Paste URL or search keywords..." autocomplete="off">
+                    <button id="search-btn" class="btn btn-primary">Search</button>
+                </div>
+            </section>
+
+            <section id="results-area" class="results-grid">
+                <!-- Results injected here -->
+            </section>
+        </main>
+    </div>
+
+    <!-- Download Options Modal -->
+    <div id="download-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Download Options</h3>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Format Type</label>
+                    <select id="format-type">
+                        <option value="video">Video (MP4)</option>
+                        <option value="audio">Audio Only (MP3/OGG)</option>
+                        <option value="playlist">Playlist</option>
+                        <option value="thumbnail">Thumbnail</option>
+                    </select>
+                </div>
+
+                <div id="video-options" class="form-group">
+                    <label class="form-label">Resolution Cap</label>
+                    <select id="video-quality">
+                        <option value="max">Best Available (Max)</option>
+                        <option value="2160">4K (2160p)</option>
+                        <option value="1440">2K (1440p)</option>
+                        <option value="1080" selected>Full HD (1080p)</option>
+                        <option value="720">HD (720p)</option>
+                        <option value="480">480p</option>
+                        <option value="360">360p</option>
+                    </select>
+                </div>
+
+                <div id="audio-options" class="form-group hidden">
+                    <label class="form-label">Audio Format</label>
+                    <select id="audio-format">
+                        <option value="mp3">MP3</option>
+                        <option value="m4a">M4A</option>
+                        <option value="ogg">OGG (Vorbis)</option>
+                        <option value="wav">WAV</option>
+                    </select>
+                </div>
+
+                <button id="confirm-download" class="btn btn-primary" style="width: 100%;">Start Download</button>
+
+                <div id="progress-container" class="progress-container">
+                    <div class="progress-bar-bg">
+                        <div id="progress-fill" class="progress-bar-fill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="progress-text">0%</span>
+                        <span id="speed-text">0 MB/s</span>
+                        <span id="eta-text">ETA: --:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="card-template">
+        <div class="card">
+            <div class="thumb-wrapper">
+                <img src="" alt="" class="thumb" loading="lazy">
+                <span class="duration-badge"></span>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title"></h3>
+                <p class="card-uploader"></p>
+                <div class="card-actions">
+                    <button class="btn btn-outline btn-sm open-options-btn">Download</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

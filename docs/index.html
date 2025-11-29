@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onyx | The Ultimate Downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #030303;
+            --fg: #ffffff;
+            --gray: #666;
+            --border: #1a1a1a;
+            --accent: #fff;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-link {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .nav-link:hover { color: var(--fg); }
+
+        .hero {
+            padding: 10rem 0 6rem;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(4rem, 14vw, 11rem);
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -0.04em;
+            margin: 0;
+            text-transform: uppercase;
+            mix-blend-mode: exclusion;
+        }
+
+        .hero-sub {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border);
+            padding-top: 2rem;
+        }
+
+        @media (min-width: 768px) {
+            .hero-sub {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+            }
+        }
+
+        p.lead {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 500px;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            background: var(--fg);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            border-radius: 0;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid var(--fg);
+        }
+
+        .btn:hover {
+            background: transparent;
+            color: var(--fg);
+        }
+
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 4rem 0;
+            background: #0a0a0a;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+
+        .marquee span {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-right: 4rem;
+            text-transform: uppercase;
+            -webkit-text-stroke: 1px #333;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin-bottom: 6rem;
+        }
+
+        .feature-card {
+            background: var(--bg);
+            padding: 3rem 2rem;
+            transition: background 0.3s;
+        }
+
+        .feature-card:hover {
+            background: #0a0a0a;
+        }
+
+        .feature-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin: 0 0 1rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .footer-link {
+            color: var(--fg);
+            text-decoration: none;
+            margin-left: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="container">
+        <header>
+            <div class="logo">ONYX</div>
+            <nav>
+                <a href="https://github.com/sethunthunder111/onyx" class="nav-link">GitHub</a>
+            </nav>
+        </header>
+        
+        <section class="hero">
+            <h1>Download<br>Everything</h1>
+            <div class="hero-sub">
+                <p class="lead">The ultimate command-line and GUI tool for the modern web. Simple. Fast. Elegant.</p>
+                <a href="https://github.com/sethunthunder111/onyx" class="btn">Get Started -></a>
+            </div>
+        </section>
+    </div>
+
+    <div class="marquee">
+        <div class="marquee-content">
+            <span>4K Video</span>
+            <span>High Fidelity Audio</span>
+            <span>Playlists</span>
+            <span>Thumbnails</span>
+            <span>Real-time Progress</span>
+            <span>CLI & GUI</span>
+            <span>4K Video</span>
+            <span>High Fidelity Audio</span>
+            <span>Playlists</span>
+            <span>Thumbnails</span>
+            <span>Real-time Progress</span>
+            <span>CLI & GUI</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="features">
+            <div class="feature-card">
+                <span class="feature-num">01</span>
+                <h3>Visual GUI</h3>
+                <p>A stunning, monochromatic web interface designed for clarity and ease of use.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">02</span>
+                <h3>Power CLI</h3>
+                <p>For those who live in the terminal. Robust, interactive, and scriptable.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">03</span>
+                <h3>High Fidelity</h3>
+                <p>Support for 8K video and lossless audio conversion (WAV, FLAC, Vorbis).</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-num">04</span>
+                <h3>Smart Core</h3>
+                <p>Built on top of yt-dlp with intelligent error handling and progress tracking.</p>
+            </div>
+        </section>
+
+        <footer>
+            <div>&copy; 2025 sethunthunder111. ISC License.</div>
+            <div>
+                <a href="#" class="footer-link">Twitter</a>
+                <a href="https://github.com/sethunthunder111/onyx" class="footer-link">GitHub</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

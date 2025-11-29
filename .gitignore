@@ -1,0 +1,8 @@
+node_modules
+downloads
+playlist
+*.log
+.env
+.DS_Store
+config.json
+yt-dlp.exe
