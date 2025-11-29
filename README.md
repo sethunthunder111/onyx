@@ -20,18 +20,21 @@
 
 ## 🚀 Installation
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
+
     ```bash
     git clone https://github.com/SethunThunder/onyx.git
     cd onyx
     ```
 
-2.  **Install dependencies:**
+2. **Install dependencies:**
+
     ```bash
     npm install
     ```
 
-3.  **Start the application:**
+3. **Start the application:**
+
     ```bash
     npm start
     ```
@@ -39,9 +42,11 @@
 ## 📖 Usage
 
 ### CLI Mode
+
 Follow the interactive prompts to search for videos, paste URLs, and select download formats.
 
 ### GUI Mode
+
 Select **"🌐 GUI Version"** from the main menu. The application will launch a local server and open `http://localhost:3000` in your default browser.
 
 ## 🛠️ Tech Stack
@@ -59,5 +64,5 @@ This project is licensed under the [ISC License](LICENSE).
 ---
 
 <p align="center">
-  Made with ❤️ by <a href="https://github.com/SethunThunder">SethunThunder</a>
+  Made with ❤️ by <a href="https://github.com/sethunthunder111">SethunThunder</a>
 </p>
