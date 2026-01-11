@@ -6,17 +6,42 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { searchVideos, getVideoInfo, download } from "./youtube.js";
 import { loadConfig } from "./config.js";
+import { projectRoot } from "./utils.js";
 import chalk from "chalk";
+import fs from "fs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const projectRoot = path.join(__dirname, "..");
+// Embed assets for the compiled binary
+// These will be bundled into the EXE by Bun
+import indexHtml from "../public/index.html" with { type: "text" };
+import styleCss from "../public/css/style.css" with { type: "text" };
+import appJs from "../public/js/app.js" with { type: "text" };
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer);
 
-app.use(express.static(path.join(projectRoot, "public")));
+// 1. Try serving from physical 'public' folder (Dev mode)
+const publicPath = path.join(projectRoot, "public");
+if (fs.existsSync(publicPath)) {
+  app.use(express.static(publicPath));
+}
+
+// 2. Fallbacks for compiled mode (Serving from embedded strings)
+app.get("/", (req, res) => {
+  res.setHeader("Content-Type", "text/html");
+  res.send(indexHtml);
+});
+
+app.get("/css/style.css", (req, res) => {
+  res.setHeader("Content-Type", "text/css");
+  res.send(styleCss);
+});
+
+app.get("/js/app.js", (req, res) => {
+  res.setHeader("Content-Type", "application/javascript");
+  res.send(appJs);
+});
+
 app.use(express.json());
 
 // API Endpoints

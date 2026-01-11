@@ -1,8 +1,14 @@
 node_modules
-downloads
-playlist
-*.log
 .env
-.DS_Store
+*.log
 config.json
+playlist/
+# Binaries
+OnyxCLI.exe
+ffmpeg.exe
 yt-dlp.exe
+# Icons & Assets not for repo
+icon.ico
+icon.png
+ytdownloader.bat
+bun.lock

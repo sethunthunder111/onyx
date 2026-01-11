@@ -1,15 +1,23 @@
 import { require } from './utils.js';
 import chalk from 'chalk';
 import gradient from 'gradient-string';
-import figlet from 'figlet';
 
 import boxen from 'boxen';
 import inquirer from 'inquirer';
 
+// Static ASCII art for ONYX to avoid figlet runtime issues
+const ONYX_BANNER = `
+ ██████╗ ███╗   ██╗██╗   ██╗██╗  ██╗
+██╔═══██╗████╗  ██║╚██╗ ██╔╝╚██╗██╔╝
+██║   ██║██╔██╗ ██║ ╚████╔╝  ╚███╔╝ 
+██║   ██║██║╚██╗██║  ╚██╔╝   ██╔██╗ 
+╚██████╔╝██║ ╚████║   ██║   ██╔╝ ██╗
+ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝
+`;
+
 export function displayBanner() {
     console.clear();
-    const title = figlet.textSync('ONYX', { font: 'Standard' });
-    const banner = gradient.pastel.multiline(title);
+    const banner = gradient.pastel.multiline(ONYX_BANNER);
     
     console.log(boxen(banner, {
         padding: 1,
@@ -202,3 +210,86 @@ export async function promptDownloadPath(currentPath) {
     ]);
     return path;
 }
+
+export async function promptConcurrencyLimit() {
+    const { limit } = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'limit',
+            message: 'Enter number of parallel downloads (1-10):',
+            default: '3',
+            validate: input => {
+                const num = parseInt(input);
+                if (isNaN(num) || num < 1 || num > 10) return 'Please enter a number between 1 and 10';
+                return true;
+            }
+        }
+    ]);
+    return parseInt(limit);
+}
+
+export class PlaylistProgress {
+    constructor(total) {
+        this.total = total;
+        this.completed = 0;
+        this.active = new Map(); // id -> { title, percent, speed, eta }
+        this.startTime = Date.now();
+    }
+
+    update(id, title, stats) {
+        this.active.set(id, { title, ...stats });
+        this.render();
+    }
+
+    complete(id) {
+        this.active.delete(id);
+        this.completed++;
+        this.render();
+    }
+
+    fail(id) {
+        this.active.delete(id);
+        this.completed++;
+        this.render();
+    }
+
+    render() {
+        console.clear();
+        
+        // Header
+        const percentTotal = Math.round((this.completed / this.total) * 100);
+        console.log(boxen(
+            chalk.bold(`Playlist Download in Progress\n`) +
+            `Completed: ${this.completed}/${this.total} (${percentTotal}%)\n` +
+            `Active Downloads: ${this.active.size}`,
+            { padding: 1, borderStyle: 'round', borderColor: 'cyan' }
+        ));
+
+        // Active Downloads
+        if (this.active.size > 0) {
+            console.log(chalk.bold('Currently Downloading:'));
+            console.log(chalk.gray('─'.repeat(50)));
+            
+            this.active.forEach((data, id) => {
+                const percent = data.percent || 0;
+                const speed = data.speed || 'Waiting...';
+                const eta = data.eta || '--:--';
+                
+                // Truncate title
+                let title = data.title;
+                if (title.length > 40) title = title.substring(0, 37) + '...';
+                
+                // Progress Bar
+                const barWidth = 20;
+                const filled = Math.round((percent / 100) * barWidth);
+                const bar = '█'.repeat(filled) + chalk.gray('░'.repeat(barWidth - filled));
+                
+                console.log(`${chalk.whiteBright(title)}`);
+                console.log(`${chalk.cyan(bar)} ${chalk.yellow(Math.round(percent))}%`);
+                console.log(`${chalk.gray('Speed:')} ${chalk.green(speed)} | ${chalk.gray('ETA:')} ${chalk.magenta(eta)}`);
+                console.log(''); // Empty line
+            });
+        }
+    }
+}
+

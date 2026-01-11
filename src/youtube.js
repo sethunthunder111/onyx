@@ -1,13 +1,12 @@
-import { require, projectRoot, ffmpegPath } from './utils.js';
+import YTDlpWrap from 'yt-dlp-wrap';
+import { projectRoot, ffmpegPath } from './utils.js';
 import path from 'path';
 import fs from 'fs';
 import ora from 'ora';
 import chalk from 'chalk';
 
-const YTDlpWrap = require('yt-dlp-wrap').default;
-
 const binaryPath = path.join(projectRoot, 'yt-dlp.exe');
-const ytDlpWrap = new YTDlpWrap(binaryPath);
+const ytDlpWrap = new (YTDlpWrap.default || YTDlpWrap)(binaryPath);
 
 export async function ensureBinary() {
     if (!fs.existsSync(binaryPath)) {
@@ -67,6 +66,30 @@ export async function getVideoInfo(url) {
     }
 }
 
+export async function getPlaylistVideos(url) {
+    const spinner = ora('Fetching playlist videos...').start();
+    try {
+        const args = [
+            '--flat-playlist',
+            '--dump-json',
+            url
+        ];
+        const stdout = await ytDlpWrap.execPromise(args);
+        spinner.stop();
+
+        return stdout.trim().split('\n').map(line => {
+            try {
+                return JSON.parse(line);
+            } catch (e) {
+                return null;
+            }
+        }).filter(Boolean);
+    } catch (error) {
+        spinner.fail('Failed to fetch playlist videos');
+        throw error;
+    }
+}
+
 export function download(args, options = {}) {
     // Add ffmpeg location to args
     args.push('--ffmpeg-location', ffmpegPath);
@@ -90,7 +113,10 @@ export function download(args, options = {}) {
         console.log(chalk.gray(`\nRunning: yt-dlp ${args.join(' ')}\n`));
     }
     
-    const downloadSpinner = ora('Starting download...').start();
+    let downloadSpinner;
+    if (!options.silent) {
+        downloadSpinner = ora('Starting download...').start();
+    }
     
     let progress = 0;
     let speed = 'N/A';
@@ -111,7 +137,9 @@ export function download(args, options = {}) {
             if (speedMatch) speed = speedMatch[1];
             if (etaMatch) eta = etaMatch[1];
 
-            downloadSpinner.text = `Downloading... ${progress}% | Speed: ${speed} | ETA: ${eta}`;
+            if (downloadSpinner) {
+                downloadSpinner.text = `Downloading... ${progress}% | Speed: ${speed} | ETA: ${eta}`;
+            }
             
             if (options.onProgress) {
                 options.onProgress({ percent: progress, speed, eta });
@@ -132,13 +160,15 @@ export function download(args, options = {}) {
 
     return new Promise((resolve, reject) => {
         eventEmitter.on('error', (error) => {
-            downloadSpinner.fail('Download failed!');
-            console.error(chalk.red(error.message));
+            if (downloadSpinner) downloadSpinner.fail('Download failed!');
+            // console.error(chalk.red(error.message)); // Suppress automatic error logging in silent mode or let caller handle? 
+            // Better to keep it unless extremely verbose
+            if (!options.silent) console.error(chalk.red(error.message));
             reject(error);
         });
 
         eventEmitter.on('close', () => {
-            downloadSpinner.succeed('Download complete! 🎉');
+            if (downloadSpinner) downloadSpinner.succeed('Download complete! 🎉');
             resolve();
         });
     });
