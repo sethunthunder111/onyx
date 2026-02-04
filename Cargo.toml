@@ -1,5 +1,5 @@
 [package]
-name = "onyx"
+name = "onyx-dl"
 version = "0.1.0"
 edition = "2021"
 authors = ["ONYX Team"]
