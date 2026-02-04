@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONYX — The Ultimate YouTube Downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050507;
+            --bg-secondary: #0f0f13;
+            --bg-tertiary: #181820;
+            --accent-cyan: #00f2ea;
+            --accent-pink: #ff0055;
+            --accent-purple: #7000ff;
+            --accent-green: #00ff9d;
+            --text-primary: #ffffff;
+            --text-secondary: #9494a0;
+            --text-muted: #525260;
+            --gradient-1: linear-gradient(135deg, #00f2ea 0%, #7000ff 50%, #ff0055 100%);
+            --gradient-2: linear-gradient(90deg, #ff0055 0%, #7000ff 100%);
+            --gradient-glow: radial-gradient(circle at center, rgba(112, 0, 255, 0.15), transparent 70%);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(15, 15, 19, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Noise Texture */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-purple);
+        }
+
+        /* Typography */
+        .font-display {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Animated Background Grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+            background-image: 
+                linear-gradient(var(--accent-purple) 1px, transparent 1px),
+                linear-gradient(90deg, var(--accent-purple) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+            animation: gridMove 30s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(20deg) translateY(0) translateZ(-100px); }
+            100% { transform: perspective(500px) rotateX(20deg) translateY(60px) translateZ(-100px); }
+        }
+
+        /* Floating Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            mix-blend-mode: screen;
+        }
+
+        .orb-1 {
+            width: 50vw;
+            height: 50vw;
+            background: var(--accent-purple);
+            opacity: 0.1;
+            top: -20%;
+            right: -10%;
+            animation: float1 20s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 40vw;
+            height: 40vw;
+            background: var(--accent-pink);
+            opacity: 0.08;
+            bottom: -10%;
+            left: -10%;
+            animation: float2 25s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-30px, 30px) rotate(5deg); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.05); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(5, 5, 7, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        nav.scrolled {
+            padding: 1rem 3rem;
+            background: rgba(5, 5, 7, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+            display: block;
+            transform: rotate(45deg);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-cyan);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            padding-top: 6rem;
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+            max-width: 1000px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2.5rem;
+            animation: fadeInUp 0.8s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(3.5rem, 10vw, 8rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero-title .line {
+            display: block;
+            overflow: hidden;
+            padding-bottom: 0.1em; /* Prevent descender clipping */
+        }
+
+        .hero-title .line span {
+            display: block;
+            transform: translateY(100%);
+            animation: revealText 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hero-title .line:nth-child(1) span { animation-delay: 0.1s; }
+        .hero-title .line:nth-child(2) span { animation-delay: 0.3s; }
+
+        @keyframes revealText {
+            to { transform: translateY(0); }
+        }
+
+        .gradient-text {
+            background: var(--gradient-1);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientAnim 5s linear infinite;
+        }
+
+        @keyframes gradientAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.35rem);
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 4rem;
+            animation: fadeInUp 0.8s ease 0.5s both;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Download Section */
+        .download-section {
+            animation: fadeInUp 0.8s ease 0.6s both;
+            width: 100%;
+        }
+
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .download-card {
+            background: var(--glass-bg);
+            border: var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .download-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .download-card:hover::before {
+            opacity: 1;
+        }
+
+        .download-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .download-card.coming-soon {
+            opacity: 0.6;
+            filter: grayscale(0.5);
+            cursor: not-allowed;
+        }
+
+        .download-card.coming-soon:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .platform-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .download-card:hover .platform-icon {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .download-card.windows .platform-icon { color: var(--accent-cyan); }
+        .download-card.linux .platform-icon { color: var(--accent-pink); }
+        .download-card.macos .platform-icon { color: var(--text-primary); }
+
+        .platform-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .platform-version {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download-btn-primary {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .download-btn-primary:hover {
+            background: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 255, 255, 0.15);
+        }
+
+        .download-btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .download-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .download-btn:disabled {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.05);
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .coming-soon-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        /* Terminal Section */
+        .terminal-section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .section-tag {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(112, 0, 255, 0.1);
+            border: 1px solid rgba(112, 0, 255, 0.3);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: #a066ff;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .terminal-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .terminal-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-glow);
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .terminal-window {
+            background: rgba(10, 10, 14, 0.9);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .terminal-window:hover .terminal-dot { transform: scale(1.1); }
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27c93f; }
+
+        .terminal-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+        }
+
+        .terminal-body {
+            padding: 2rem;
+            font-family: 'Fira Code', 'SF Mono', monospace;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #d0d0d0;
+        }
+
+        .terminal-line {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+            min-height: 1.8em;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-pink);
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .terminal-command {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .terminal-comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+            margin-left: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .copy-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 8rem 2rem;
+            position: relative;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 3rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            group: feature;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            font-size: 1.8rem;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .feature-card:hover .feature-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
+        .feature-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* Parallax Container */
+        .parallax-container {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4rem 0;
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.5), transparent);
+        }
+
+        .parallax-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(5rem, 15vw, 15rem);
+            font-weight: 700;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.08);
+            white-space: nowrap;
+            position: absolute;
+            opacity: 0.5;
+        }
+
+        /* Footer */
+        footer {
+            padding: 5rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(to top, #050507, transparent);
+        }
+
+        .footer-logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            letter-spacing: -0.05em;
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .download-grid {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="noise-overlay"></div>
+    <div class="bg-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="logo">ONYX</div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#install">Install</a></li>
+            <li><a href="#download">Download</a></li>
+            <li><a href="https://github.com/onyx-team/onyx" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="download">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                Now Available v0.1.0
+            </div>
+            <h1 class="hero-title">
+                <span class="line"><span>The Ultimate</span></span>
+                <span class="line"><span class="gradient-text">YouTube Tool</span></span>
+            </h1>
+            <p class="hero-subtitle">
+                Engineered for speed. Built with Rust. <br>
+                Download videos, audio, and playlists with a beautiful TUI or Web Interface.
+            </p>
+
+            <!-- Download Section -->
+            <div class="download-section">
+                <div class="download-grid">
+                    <!-- Windows -->
+                    <div class="download-card windows">
+                        <div class="platform-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 5.5l7.5-.8v7.2H3V5.5zm8.5-.9l9-.9v8.9h-9V4.6zM3 12.5h7.5v7.2L3 18.9v-6.4zm8.5 0h9v8.4l-9 .9v-9.3z"/>
+                            </svg>
+                        </div>
+                        <div class="platform-name">Windows</div>
+                        <div class="platform-version">x64 Installer (.exe)</div>
+                        <a href="onyx-windows-x64.exe" class="download-btn download-btn-primary">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                            </svg>
+                            Download
+                        </a>
+                    </div>
+
+                    <!-- Linux -->
+                    <div class="download-card linux" id="install">
+                        <div class="platform-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                        </div>
+                        <div class="platform-name">Linux</div>
+                        <div class="platform-version">x86_64 / ARM64</div>
+                        <button class="download-btn download-btn-secondary" onclick="showLinuxInstall()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 17l6-6-6-6M12 19h8"/>
+                            </svg>
+                            Install Script
+                        </button>
+                    </div>
+
+                    <!-- macOS -->
+                    <div class="download-card macos coming-soon">
+                        <div class="platform-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 0 0-8 8c0 4.418 3.582 8 8 8s8-3.582 8-8-3.582-8-8-8zm0 3a5 5 0 0 1 5 5c0 2.761-2.239 5-5 5s-5-2.239-5-5 2.239-5 5-5z"/>
+                            </svg>
+                        </div>
+                        <div class="platform-name">macOS</div>
+                        <div class="platform-version">Universal Binary</div>
+                        <button disabled class="download-btn">
+                            Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Terminal Section -->
+    <section class="terminal-section">
+        <div class="section-header reveal">
+            <span class="section-tag">Quick Start</span>
+            <h2 class="section-title">Install in Seconds</h2>
+        </div>
+        <div class="terminal-wrapper reveal">
+            <div class="terminal-window" id="terminal-window">
+                <div class="terminal-header">
+                    <div class="terminal-controls">
+                        <div class="terminal-dot red"></div>
+                        <div class="terminal-dot yellow"></div>
+                        <div class="terminal-dot green"></div>
+                    </div>
+                    <span class="terminal-title">bash — 80×24</span>
+                    <button class="copy-btn" onclick="copyCommand()">Copy</button>
+                </div>
+                <div class="terminal-body">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command" id="install-command">curl -fsSL https://onyx.dev/install.sh | bash</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command">onyx --version</span>
+                    </div>
+                    <div class="terminal-output">
+                        ONYX v0.1.0 (release)
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command">onyx "https://youtu.be/dQw4w9WgXcQ"</span>
+                    </div>
+                    <div class="terminal-output" style="color: var(--accent-cyan);">
+                        <br>
+                        Downloading: Never Gonna Give You Up<br>
+                        [====================> ] 98% • 4.2MB/s
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parallax Section -->
+    <section class="parallax-container">
+        <div class="parallax-text" data-speed="0.2">UNLIMITED</div>
+        <div class="parallax-text" data-speed="-0.2" style="top: 60%; opacity: 0.2;">DOWNLOADS</div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="section-header reveal">
+            <span class="section-tag">Capabilities</span>
+            <h2 class="section-title">Power Meets Simplicity</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">🎬</div>
+                <h3 class="feature-title">4K Video Support</h3>
+                <p class="feature-desc">Experience crystal clear quality. Download videos in 4K, 1080p, or any resolution you need with full codec control.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">🎵</div>
+                <h3 class="feature-title">Smart Audio</h3>
+                <p class="feature-desc">Extract high-fidelity audio automatically. Supports MP3, FLAC, and AAC with automatic metadata tagging.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">⚡</div>
+                <h3 class="feature-title">Blazing Fast</h3>
+                <p class="feature-desc">Written in Rust for maximum performance and low memory footprint. Concurrent downloads for maximum bandwidth.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">📱</div>
+                <h3 class="feature-title">Cross Platform</h3>
+                <p class="feature-desc">Run it anywhere. One single binary for Windows, Linux, and macOS (coming soon). No dependencies.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">🧠</div>
+                <h3 class="feature-title">Smart Metadata</h3>
+                <p class="feature-desc">Auto-embeds thumbnails, subtitles, and chapters. Your library has never looked this organized.</p>
+            </div>
+            <div class="feature-card reveal">
+                <div class="feature-icon-wrapper">🌐</div>
+                <h3 class="feature-title">Remote Web UI</h3>
+                <p class="feature-desc">Control downloads from your phone or another computer with the built-in lightweight web interface.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">ONYX</div>
+        <p class="footer-text">The new standard in media archiving.</p>
+        <div class="footer-links">
+            <a href="https://github.com/onyx-team/onyx" target="_blank">GitHub</a>
+            <a href="#">Documentation</a>
+            <a href="#">License</a>
+            <a href="#">Report Issue</a>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mouse tracking for card spotlight effect
+        document.querySelectorAll('.download-card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+
+        // Parallax effect
+        const parallaxElements = document.querySelectorAll('.parallax-text');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            parallaxElements.forEach(el => {
+                const speed = parseFloat(el.dataset.speed);
+                const yPos = (scrolled * speed) - 100;
+                el.style.transform = `translateX(${yPos}px)`;
+            });
+        });
+
+        // Scroll reveal animation
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // Copy command function
+        function copyCommand() {
+            const command = document.getElementById('install-command').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.borderColor = 'var(--accent-green)';
+                btn.style.color = 'var(--accent-green)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        // Show Linux install command
+        function showLinuxInstall() {
+            const terminalWindow = document.getElementById('terminal-window');
+            terminalWindow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            terminalWindow.style.borderColor = 'var(--accent-pink)';
+            setTimeout(() => {
+                terminalWindow.style.borderColor = '';
+            }, 1000);
+        }
+
+        // Typewriter effect
+        const terminalCommands = document.querySelectorAll('.terminal-command');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const cmd = entry.target;
+                    if (!cmd.dataset.typed) {
+                        cmd.dataset.typed = "true";
+                        const text = cmd.textContent;
+                        cmd.textContent = '';
+                        let i = 0;
+                        const typeWriter = () => {
+                            if (i < text.length) {
+                                cmd.textContent += text.charAt(i);
+                                i++;
+                                setTimeout(typeWriter, 40); // slightly faster typing
+                            }
+                        };
+                        setTimeout(typeWriter, 300);
+                    }
+                }
+            });
+        });
+        terminalCommands.forEach(cmd => observer.observe(cmd));
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

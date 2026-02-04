@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONYX - YouTube Downloader</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">◆</span>
+                <span class="logo-text">ONYX</span>
+            </div>
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="search">🔍 Search</button>
+                <button class="nav-tab" data-tab="url">🔗 URL</button>
+                <button class="nav-tab" data-tab="playlist">📦 Playlist</button>
+                <button class="nav-tab" data-tab="downloads">📥 Downloads</button>
+            </nav>
+        </header>
+
+        <!-- Search Tab -->
+        <main class="content" id="search-tab">
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search YouTube..." autocomplete="off">
+                    <button id="search-btn" class="search-btn">
+                        <span class="search-icon">🔍</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="search-results" class="results-grid"></div>
+            <div id="search-loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Searching YouTube...</p>
+            </div>
+        </main>
+
+        <!-- URL Tab -->
+        <main class="content hidden" id="url-tab">
+            <div class="url-container">
+                <h2>Download from URL</h2>
+                <p class="subtitle">Paste a YouTube video URL to download</p>
+                <div class="url-box">
+                    <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=...">
+                    <button id="url-btn" class="primary-btn">Fetch Info</button>
+                </div>
+                <div id="url-result" class="url-result hidden"></div>
+            </div>
+        </main>
+
+        <!-- Playlist Tab -->
+        <main class="content hidden" id="playlist-tab">
+            <div class="url-container">
+                <h2>Download Playlist</h2>
+                <p class="subtitle">Paste a YouTube playlist URL</p>
+                <div class="url-box">
+                    <input type="text" id="playlist-input" placeholder="https://www.youtube.com/playlist?list=...">
+                    <button id="playlist-btn" class="primary-btn">Fetch Playlist</button>
+                </div>
+                <div id="playlist-result" class="playlist-result hidden"></div>
+            </div>
+        </main>
+
+        <!-- Downloads Tab -->
+        <main class="content hidden" id="downloads-tab">
+            <div class="downloads-container">
+                <h2>Active Downloads</h2>
+                <div id="downloads-list" class="downloads-list">
+                    <div class="empty-state">
+                        <span class="empty-icon">📥</span>
+                        <p>No active downloads</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Video Modal -->
+        <div id="video-modal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <button class="modal-close">&times;</button>
+                <div class="modal-video-info">
+                    <img id="modal-thumbnail" src="" alt="Thumbnail">
+                    <div class="modal-details">
+                        <h2 id="modal-title"></h2>
+                        <p id="modal-channel"></p>
+                        <p id="modal-duration"></p>
+                    </div>
+                </div>
+                <div class="download-options">
+                    <div class="option-tabs">
+                        <button class="option-tab active" data-option="video">🎬 Video</button>
+                        <button class="option-tab" data-option="audio">🎵 Audio</button>
+                        <button class="option-tab" data-option="thumbnail">🖼️ Thumbnail</button>
+                    </div>
+                    <div id="video-options" class="options-list"></div>
+                    <div id="audio-options" class="options-list hidden"></div>
+                    <div id="thumbnail-options" class="options-list hidden">
+                        <button class="quality-btn" data-format="maxres">📸 Maximum Resolution</button>
+                        <button class="quality-btn" data-format="hq">📸 High Quality</button>
+                        <button class="quality-btn" data-format="mq">📸 Medium Quality</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

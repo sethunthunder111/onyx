@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Onyx
+Exec=onyx
+Icon=onyx
+Type=Application
+Categories=Video;Audio;Network;
+Terminal=true
+Comment=The Ultimate YouTube Downloader
