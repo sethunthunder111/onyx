@@ -1,1 +1,34 @@
+# Build artifacts
 /target
+Onyx-x86_64.AppImage
+appimagetool
+
+# Large video files
+ONYX/
+*.webm
+*.mp4
+*.mkv
+*.avi
+*.mov
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rust
+**/*.rs.bk
+Cargo.lock.bak
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp

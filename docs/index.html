@@ -825,7 +825,7 @@
             <li><a href="#features">Features</a></li>
             <li><a href="#install">Install</a></li>
             <li><a href="#download">Download</a></li>
-            <li><a href="https://github.com/onyx-team/onyx" target="_blank">GitHub</a></li>
+            <li><a href="https://github.com/sethunthunder111/onyx" target="_blank">GitHub</a></li>
         </ul>
     </nav>
 
@@ -857,7 +857,7 @@
                         </div>
                         <div class="platform-name">Windows</div>
                         <div class="platform-version">x64 Installer (.exe)</div>
-                        <a href="onyx-windows-x64.exe" class="download-btn download-btn-primary">
+                        <a href="https://github.com/sethunthunder111/onyx/releases/latest/download/onyx-windows-x64.exe" class="download-btn download-btn-primary">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
                             </svg>
@@ -919,24 +919,34 @@
                 </div>
                 <div class="terminal-body">
                     <div class="terminal-line">
-                        <span class="terminal-prompt">$</span>
-                        <span class="terminal-command" id="install-command">curl -fsSL https://onyx.dev/install.sh | bash</span>
+                        <span class="terminal-comment"># Option 1: Install with cargo</span>
                     </div>
                     <div class="terminal-line">
                         <span class="terminal-prompt">$</span>
-                        <span class="terminal-command">onyx --version</span>
+                        <span class="terminal-command" id="install-command">cargo install --git https://github.com/sethunthunder111/onyx.git</span>
                     </div>
-                    <div class="terminal-output">
-                        ONYX v0.1.0 (release)
+                    <div class="terminal-line" style="margin-top: 1.5rem;">
+                        <span class="terminal-comment"># Option 2: Clone and build from source</span>
                     </div>
                     <div class="terminal-line">
                         <span class="terminal-prompt">$</span>
-                        <span class="terminal-command">onyx "https://youtu.be/dQw4w9WgXcQ"</span>
+                        <span class="terminal-command">git clone https://github.com/sethunthunder111/onyx.git && cd onyx</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command">./install.sh</span>
+                    </div>
+                    <div class="terminal-output" style="color: var(--accent-green);">
+                        ✓ Dependencies checked<br>
+                        ✓ Binary installed to ~/.local/bin<br>
+                        ✓ Desktop integration complete
+                    </div>
+                    <div class="terminal-line" style="margin-top: 1.5rem;">
+                        <span class="terminal-prompt">$</span>
+                        <span class="terminal-command">onyx</span>
                     </div>
                     <div class="terminal-output" style="color: var(--accent-cyan);">
-                        <br>
-                        Downloading: Never Gonna Give You Up<br>
-                        [====================> ] 98% • 4.2MB/s
+                        Welcome to ONYX — The Ultimate YouTube Downloader 🚀
                     </div>
                 </div>
             </div>
@@ -994,7 +1004,7 @@
         <div class="footer-logo">ONYX</div>
         <p class="footer-text">The new standard in media archiving.</p>
         <div class="footer-links">
-            <a href="https://github.com/onyx-team/onyx" target="_blank">GitHub</a>
+            <a href="https://github.com/sethunthunder111/onyx" target="_blank">GitHub</a>
             <a href="#">Documentation</a>
             <a href="#">License</a>
             <a href="#">Report Issue</a>
